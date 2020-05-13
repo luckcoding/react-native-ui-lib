@@ -1,12 +1,137 @@
+import React, {PureComponent} from 'react';
+import {Platform, StyleSheet, LayoutAnimation, Image, LayoutChangeEvent, ImageStyle, TextStyle} from 'react-native';
 import _ from 'lodash';
-import PropTypes from 'prop-types';
-import React from 'react';
-import {Platform, StyleSheet, LayoutAnimation, Image} from 'react-native';
+import {
+  asBaseComponent,
+  forwardRef,
+  BaseComponentInjectedProps,
+  ForwardRefInjectedProps,
+  TypographyModifiers,
+  ColorsModifiers,
+  BackgroundColorModifier,
+  MarginModifiers
+} from '../../commons/new';
+//@ts-ignore
 import {Constants} from '../../helpers';
 import {Colors, Typography, ThemeManager, BorderRadiuses} from '../../style';
-import {PureBaseComponent} from '../../commons';
+import {extractColorValue, extractTypographyValue} from '../../commons/modifiers';
 import TouchableOpacity from '../touchableOpacity';
-import Text from '../text';
+import Text, {TextPropTypes} from '../text';
+
+export type ButtonPropTypes = TextPropTypes &
+  TypographyModifiers &
+  ColorsModifiers &
+  BackgroundColorModifier &
+  MarginModifiers & {
+    /**
+     * Text to show inside the button
+     */
+    label?: string;
+    /**
+     * The Button text color (inherited from Text component)
+     */
+    color?: string;
+    /**
+     * Icon image source
+     */
+    iconSource?: object | number | Function;
+    /**
+     * Icon image style
+     */
+    iconStyle?: ImageStyle;
+    /**
+     * Should the icon be right to the label
+     */
+    iconOnRight?: boolean;
+    /**
+     * Color of the button background
+     */
+    backgroundColor?: string;
+    /**
+     * Size of the button [large, medium, small, xSmall]
+     */
+    size?: 'xSmall' | 'small' | 'medium' | 'large';
+    /**
+     * Custom border radius.
+     */
+    borderRadius?: number;
+    /**
+     * Actions handler
+     */
+    onPress?: Function;
+    /**
+     * Disable interactions for the component
+     */
+    disabled?: boolean;
+    /**
+     * Button will have outline style
+     */
+    outline?: boolean;
+    /**
+     * The outline color
+     */
+    outlineColor?: string;
+    /**
+     * The outline width
+     */
+    outlineWidth?: number;
+    /**
+     * Button will look like a link
+     */
+    link?: boolean;
+    /**
+     * label color for when it's displayed as link
+     */
+    linkColor?: string;
+    /**
+     * Additional styles for label text
+     */
+    labelStyle?: TextStyle;
+    /**
+     * Props that will be passed to the button's Text label.
+     */
+    labelProps?: object;
+    /**
+     * should the button act as a coast to coast button (no border radius)
+     */
+    fullWidth?: boolean;
+    /**
+     * should the button be a round button
+     */
+    round?: boolean;
+    /**
+     * Control shadow visibility (iOS-only)
+     */
+    enableShadow?: boolean;
+    /**
+     * avoid inner button padding
+     */
+    avoidInnerPadding?: boolean;
+    /**
+     * avoid minimum width constraints
+     */
+    avoidMinWidth?: boolean;
+    /**
+     * callback for getting activeBackgroundColor (e.g. (calculatedBackgroundColor, prop) => {...})
+     * better set using ThemeManager
+     */
+    getActiveBackgroundColor?: Function;
+    /**
+     * should animate layout change
+     * Note?: For Android you must set 'setLayoutAnimationEnabledExperimental(true)' via RN's 'UIManager'
+     */
+    animateLayout?: boolean;
+    /**
+     * the direction of the animation ('left' and 'right' will effect the button's own alignment)
+     */
+    animateTo?: 'center' | 'left' | 'right';
+  };
+
+export type ButtonState = {
+  size?: number;
+  borderRadius?: number;
+  isLandscape?: boolean;
+};
 
 const PADDINGS = {
   XSMALL: 3,
@@ -28,121 +153,18 @@ const MIN_WIDTH = {
 };
 const DEFAULT_SIZE = 'large';
 
+type Props = ButtonPropTypes & BaseComponentInjectedProps & ForwardRefInjectedProps;
+
 /**
  * @description: Basic button component
  * @extends: TouchableOpacity
  * @extendslink: docs/TouchableOpacity
  * @modifiers: margin, background
  * @gif: https://media.giphy.com/media/xULW8j5WzsuPytqklq/giphy.gif
- * @example: https://github.com/wix/react-native-ui-lib/blob/master/demo/src/screens/componentScreens/ButtonsScreen.js
+ * @example: https://github.com/wix/react-native-ui-lib/blob/master/demo/src/screens/componentScreens/ButtonsScreen.tsx
  */
-export default class Button extends PureBaseComponent {
+class Button extends PureComponent<Props, ButtonState> {
   static displayName = 'Button';
-  static propTypes = {
-    ...Text.propTypes,
-    /**
-     * Text to show inside the button
-     */
-    label: PropTypes.string,
-    /**
-     * The Button text color (inherited from Text component)
-     */
-    color: PropTypes.string,
-    /**
-     * Icon image source
-     */
-    iconSource: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.func]),
-    /**
-     * Icon image style
-     */
-    iconStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array]),
-    /**
-     * Should the icon be right to the label
-     */
-    iconOnRight: PropTypes.bool,
-    /**
-     * Color of the button background
-     */
-    backgroundColor: PropTypes.string,
-    /**
-     * Size of the button [large, medium, small]
-     */
-    size: PropTypes.oneOf(['xSmall', 'small', 'medium', 'large']),
-    /**
-     * Custom border radius.
-     */
-    borderRadius: PropTypes.number,
-    /**
-     * Actions handler
-     */
-    onPress: PropTypes.func,
-    /**
-     * Disable interactions for the component
-     */
-    disabled: PropTypes.bool,
-    /**
-     * Button will have outline style
-     */
-    outline: PropTypes.bool,
-    /**
-     * The outline color
-     */
-    outlineColor: PropTypes.string,
-    /**
-     * The outline width
-     */
-    outlineWidth: PropTypes.number,
-    /**
-     * Button will look like a link
-     */
-    link: PropTypes.bool,
-    /**
-     * label color for when it's displayed as link
-     */
-    linkColor: PropTypes.string,
-    /**
-     * Additional styles for label text
-     */
-    labelStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array]),
-    /**
-     * Props that will be passed to the button's Text label.
-     */
-    labelProps: PropTypes.object,
-    /**
-     * should the button act as a coast to coast button (no border radius)
-     */
-    fullWidth: PropTypes.bool,
-    /**
-     * should the button be a round button
-     */
-    round: PropTypes.bool,
-    /**
-     * Control shadow visibility
-     */
-    enableShadow: PropTypes.bool, // iOS-only
-    /**
-     * avoid inner button padding
-     */
-    avoidInnerPadding: PropTypes.bool,
-    /**
-     * avoid minimum width constraints
-     */
-    avoidMinWidth: PropTypes.bool,
-    /**
-     * callback for getting activeBackgroundColor (e.g. (calculatedBackgroundColor, prop) => {...})
-     * better set using ThemeManager
-     */
-    getActiveBackgroundColor: PropTypes.func,
-    /**
-     * should animate layout change
-     * Note: For Android you must set 'setLayoutAnimationEnabledExperimental(true)' via RN's 'UIManager'
-     */
-    animateLayout: PropTypes.bool,
-    /**
-     * the direction of the animation ('left' and 'right' will effect the button's own alignment)
-     */
-    animateTo: PropTypes.oneOf(['center', 'left', 'right'])
-  };
 
   static defaultProps = {
     iconOnRight: false
@@ -163,11 +185,16 @@ export default class Button extends PureBaseComponent {
 
   // This redundant constructor for some reason fix tests :/
   // eslint-disable-next-line
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
   }
 
-  componentDidUpdate(prevProps) {
+  state = {
+    size: undefined
+  };
+  styles = createStyles();
+
+  componentDidUpdate(prevProps: Props) {
     if (this.props.animateLayout && !_.isEqual(prevProps, this.props)) {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     }
@@ -189,7 +216,7 @@ export default class Button extends PureBaseComponent {
   };
 
   // This method will be called more than once in case of layout change!
-  onLayout = event => {
+  onLayout = (event: LayoutChangeEvent) => {
     const height = event.nativeEvent.layout.height;
     if (this.props.round) {
       const width = event.nativeEvent.layout.width;
@@ -202,29 +229,25 @@ export default class Button extends PureBaseComponent {
     }
   };
 
-  generateStyles() {
-    this.styles = createStyles(this.getThemeProps());
-  }
-
   get isOutline() {
-    const {outline, outlineColor} = this.getThemeProps();
+    const {outline, outlineColor} = this.props;
     return Boolean(outline || outlineColor);
   }
 
   get isFilled() {
-    const {link} = this.getThemeProps();
+    const {link} = this.props;
     return !this.isOutline && !link;
   }
 
   get isIconButton() {
-    const {iconSource, label} = this.getThemeProps();
+    const {iconSource, label} = this.props;
     return iconSource && !label;
   }
 
   getBackgroundColor() {
-    const {backgroundColor: themeBackgroundColor} = this.getThemeProps();
+    const {backgroundColor: themeBackgroundColor, modifiers} = this.props;
     const {disabled, outline, link, backgroundColor: propsBackgroundColor} = this.props;
-    const {backgroundColor: stateBackgroundColor} = this.state;
+    const {backgroundColor: stateBackgroundColor} = modifiers;
 
     if (!outline && !link) {
       if (disabled) {
@@ -237,16 +260,16 @@ export default class Button extends PureBaseComponent {
   }
 
   getActiveBackgroundColor() {
-    const {getActiveBackgroundColor} = this.getThemeProps();
+    const {getActiveBackgroundColor} = this.props;
     if (getActiveBackgroundColor) {
-      return getActiveBackgroundColor(this.getBackgroundColor(), this.getThemeProps());
+      return getActiveBackgroundColor(this.getBackgroundColor(), this.props);
     }
   }
 
   getLabelColor() {
-    const {link, linkColor, outline, outlineColor, disabled, color: propsColor} = this.getThemeProps();
+    const {link, linkColor, outline, outlineColor, disabled, color: propsColor} = this.props;
 
-    let color = Colors.white;
+    let color: string | undefined = Colors.white;
     if (link) {
       color = linkColor || Colors.blue30;
     } else if (outline) {
@@ -259,14 +282,14 @@ export default class Button extends PureBaseComponent {
       return ThemeManager.CTADisabledColor;
     }
 
-    color = propsColor || this.extractColorValue() || color;
+    color = propsColor || extractColorValue(this.props) || color;
     return color;
   }
 
   getLabelSizeStyle() {
-    const size = this.getThemeProps().size || DEFAULT_SIZE;
+    const size = this.props.size || DEFAULT_SIZE;
 
-    const LABEL_STYLE_BY_SIZE = {};
+    const LABEL_STYLE_BY_SIZE: Dictionary<object> = {};
     LABEL_STYLE_BY_SIZE[Button.sizes.xSmall] = {...Typography.text80};
     LABEL_STYLE_BY_SIZE[Button.sizes.small] = {...Typography.text80};
     LABEL_STYLE_BY_SIZE[Button.sizes.medium] = {...Typography.text80};
@@ -277,11 +300,11 @@ export default class Button extends PureBaseComponent {
   }
 
   getContainerSizeStyle() {
-    const {outline, link, avoidMinWidth, avoidInnerPadding, round} = this.getThemeProps();
-    const size = this.getThemeProps().size || DEFAULT_SIZE;
-    const outlineWidth = this.getThemeProps().outlineWidth || 1;
+    const {outline, link, avoidMinWidth, avoidInnerPadding, round} = this.props;
+    const size = this.props.size || DEFAULT_SIZE;
+    const outlineWidth = this.props.outlineWidth || 1;
 
-    const CONTAINER_STYLE_BY_SIZE = {};
+    const CONTAINER_STYLE_BY_SIZE: Dictionary<any> = {};
     CONTAINER_STYLE_BY_SIZE[Button.sizes.xSmall] = round
       ? {height: this.state.size, width: this.state.size, padding: PADDINGS.XSMALL}
       : {
@@ -312,7 +335,7 @@ export default class Button extends PureBaseComponent {
       };
 
     if (outline) {
-      _.forEach(CONTAINER_STYLE_BY_SIZE, style => {
+      _.forEach(CONTAINER_STYLE_BY_SIZE, (style) => {
         if (round) {
           style.padding -= outlineWidth; // eslint-disable-line
         } else {
@@ -343,7 +366,7 @@ export default class Button extends PureBaseComponent {
   }
 
   getOutlineStyle() {
-    const {outline, outlineColor, outlineWidth, link, disabled} = this.getThemeProps();
+    const {outline, outlineColor, outlineWidth, link, disabled} = this.props;
 
     let outlineStyle;
     if ((outline || outlineColor) && !link) {
@@ -360,28 +383,28 @@ export default class Button extends PureBaseComponent {
   }
 
   getBorderRadiusStyle() {
-    const {link, fullWidth, borderRadius: borderRadiusFromProps} = this.getThemeProps();
+    const {link, fullWidth, borderRadius: borderRadiusFromProps, modifiers} = this.props;
     if (link || fullWidth || borderRadiusFromProps === 0) {
       return {borderRadius: 0};
     }
 
-    const {borderRadius: borderRadiusFromState} = this.state;
+    const {borderRadius: borderRadiusFromState} = modifiers;
     const borderRadius = borderRadiusFromProps || borderRadiusFromState || BorderRadiuses.br100;
     return {borderRadius};
   }
 
   getShadowStyle() {
     const backgroundColor = this.getBackgroundColor();
-    const {enableShadow} = this.getThemeProps();
+    const {enableShadow} = this.props;
     if (enableShadow) {
       return [this.styles.shadowStyle, backgroundColor && {shadowColor: backgroundColor}];
     }
   }
 
   getIconStyle() {
-    const {disabled, iconStyle: propsIconStyle, iconOnRight} = this.getThemeProps();
-    const size = this.getThemeProps().size || DEFAULT_SIZE;
-    const iconStyle = {
+    const {disabled, iconStyle: propsIconStyle, iconOnRight} = this.props;
+    const size = this.props.size || DEFAULT_SIZE;
+    const iconStyle: ImageStyle = {
       tintColor: this.getLabelColor()
     };
 
@@ -402,7 +425,7 @@ export default class Button extends PureBaseComponent {
   }
 
   getAnimationDirectionStyle() {
-    const {animateTo} = this.getThemeProps();
+    const {animateTo} = this.props;
 
     let style;
     switch (animateTo) {
@@ -434,15 +457,15 @@ export default class Button extends PureBaseComponent {
   }
 
   renderLabel() {
-    const {label, labelStyle, labelProps} = this.getThemeProps();
-    const typography = this.extractTypographyValue();
+    const {label, labelStyle, labelProps} = this.props;
+    const typography = extractTypographyValue(this.props);
     const color = this.getLabelColor();
     const labelSizeStyle = this.getLabelSizeStyle();
 
     if (label) {
       return (
         <Text
-          style={[this.styles.text, color && {color}, labelSizeStyle, {...typography}, labelStyle]}
+          style={[this.styles.text, !!color && {color}, labelSizeStyle, {...typography}, labelStyle]}
           numberOfLines={1}
           {...labelProps}
         >
@@ -454,9 +477,9 @@ export default class Button extends PureBaseComponent {
   }
 
   render() {
-    const {onPress, disabled, link, style, testID, animateLayout, ...others} = this.getThemeProps();
+    const {onPress, disabled, link, style, testID, animateLayout, modifiers, forwardedRef, ...others} = this.props;
     const shadowStyle = this.getShadowStyle();
-    const {margins} = this.state;
+    const {margins} = modifiers;
     const backgroundColor = this.getBackgroundColor();
     const outlineStyle = this.getOutlineStyle();
     const containerSizeStyle = this.getContainerSizeStyle();
@@ -485,7 +508,7 @@ export default class Button extends PureBaseComponent {
         disabled={disabled}
         testID={testID}
         {...others}
-        ref={this.setRef}
+        ref={forwardedRef}
       >
         {this.props.children}
         {this.props.iconOnRight ? this.renderLabel() : this.renderIcon()}
@@ -527,3 +550,7 @@ function createStyles() {
     }
   });
 }
+
+export {Button}; // For tests
+
+export default asBaseComponent<ButtonPropTypes>(forwardRef(Button));
