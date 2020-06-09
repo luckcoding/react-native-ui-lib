@@ -61,6 +61,7 @@
     "@babel/core": "^7.4.0",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-react": "^7.10.1",
+    "@babel/preset-typescript": "^7.10.1",
     "@babel/runtime": "^7.4.2",
     "@react-native-community/async-storage": "^1.6.2",
     "@react-native-community/blur": "^3.4.1",
@@ -100,13 +101,13 @@
     "typescript": "3.8.3"
   },
   "peerDependencies": {
+    "@react-native-community/blur": ">=3.4.1",
+    "@react-native-community/datetimepicker": "^2.1.0",
+    "@react-native-community/netinfo": "^5.6.2",
     "react": ">=16.0.0",
     "react-native": ">=0.61.5",
     "react-native-gesture-handler": ">=1.5.0",
-    "react-native-reanimated": ">=1.4.0",
-    "@react-native-community/blur": ">=3.4.1",
-    "@react-native-community/datetimepicker": "^2.1.0",
-    "@react-native-community/netinfo": "^5.6.2"
+    "react-native-reanimated": ">=1.4.0"
   },
   "jest": {
     "preset": "react-native",
