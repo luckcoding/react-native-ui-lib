@@ -360,12 +360,14 @@ export function generateModifiersStyle(options = {
   if (options.flex) {
     style.flexStyle = extractFlexStyle(boundProps);
   }
-
   if (options.position) {
     style.positionStyle = extractPositionStyle(boundProps);
   }
 
   return style;
+  // clean empty objects and undefined
+  // (!) This change is currently breaking UI layout for some reason - worth investigating
+  // return _.omitBy(style, value => _.isUndefined(value) || (_.isPlainObject(value) && _.isEmpty(value))); 
 }
 
 export function getAlteredModifiersOptions(currentProps: any, nextProps: any) {
