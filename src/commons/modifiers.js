@@ -59,7 +59,9 @@ export function extractTypographyValue(props) {
 
   _.forEach(typographyPropsKeys, key => {
     if (props[key] === true) {
-      typography = Typography[key];
+      typography = { ...typography,
+        ...Typography[key]
+      };
     }
   });
 

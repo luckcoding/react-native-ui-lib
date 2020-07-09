@@ -21,7 +21,6 @@ class Text extends PureComponent {
     uppercase: _pt.bool,
     highlightString: _pt.string,
     animated: _pt.bool,
-    ref: _pt.any,
     textAlign: _pt.string
   };
   static displayName = 'Text';

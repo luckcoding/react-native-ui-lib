@@ -10,10 +10,7 @@ import { asBaseComponent, forwardRef } from '../../commons/new';
 import TouchableOpacity from '../touchableOpacity';
 import View from '../view';
 import Text from '../text';
-
-const Image = require('../image').default; // TODO: change this once Image is written in typescript
-
-
+import Image from '../image';
 import asRadioGroupChild from './asRadioGroupChild';
 const DEFAULT_SIZE = 24;
 const DEFAULT_COLOR = Colors.blue30;

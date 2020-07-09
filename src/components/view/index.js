@@ -19,7 +19,9 @@ class View extends PureComponent {
     animated: _pt.bool,
     inaccessible: _pt.bool,
     width: _pt.oneOfType([_pt.string, _pt.number]),
-    height: _pt.oneOfType([_pt.string, _pt.number])
+    height: _pt.oneOfType([_pt.string, _pt.number]),
+    renderDelay: _pt.number,
+    backgroundColor: _pt.string
   };
   static displayName = 'View';
 
@@ -29,6 +31,24 @@ class View extends PureComponent {
 
     if (props.animated) {
       this.Container = Animated.createAnimatedComponent(this.Container);
+    }
+
+    this.state = {
+      ready: !props.renderDelay
+    };
+  }
+
+  componentDidMount() {
+    const {
+      renderDelay
+    } = this.props;
+
+    if (renderDelay) {
+      setTimeout(() => {
+        this.setState({
+          ready: true
+        });
+      }, renderDelay);
     }
   } // TODO: do we need this?
 
@@ -40,8 +60,12 @@ class View extends PureComponent {
   }
 
   render() {
-    // (!) extract left, top, bottom... props to avoid passing them on Android
+    if (!this.state.ready) {
+      return null;
+    } // (!) extract left, top, bottom... props to avoid passing them on Android
     // eslint-disable-next-line
+
+
     const {
       modifiers,
       style,

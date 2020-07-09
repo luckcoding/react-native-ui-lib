@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react'; //@ts-ignore
 import hoistNonReactStatic from 'hoist-non-react-statics';
 import { Image as RNImage, StyleSheet, ImageBackground } from 'react-native';
 import Constants from '../../helpers/Constants';
-import { asBaseComponent, forwardRef } from '../../commons/new'; // @ts-ignore
+import { asBaseComponent } from '../../commons/new'; // @ts-ignore
 
 import Assets from '../../assets';
 import Overlay from '../overlay';
@@ -101,7 +101,6 @@ class Image extends PureComponent {
       overlayType,
       overlayColor,
       customOverlayContent,
-      forwardedRef,
       ...others
     } = this.props;
     const shouldFlipRTL = supportRTL && Constants.isRTL;
@@ -110,7 +109,6 @@ class Image extends PureComponent {
       /*#__PURE__*/
       // @ts-ignore
       React.createElement(ImageView, _extends({
-        ref: forwardedRef,
         style: [{
           tintColor
         }, shouldFlipRTL && styles.rtlFlipped, cover && styles.coverImage, this.isGif() && styles.gifImage, aspectRatio && {
@@ -146,4 +144,4 @@ const styles = StyleSheet.create({
 });
 hoistNonReactStatic(Image, RNImage);
 export { Image };
-export default asBaseComponent(forwardRef(Image));
+export default asBaseComponent(Image);

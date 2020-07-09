@@ -12,6 +12,23 @@ import { Colors, Typography, ThemeManager, BorderRadiuses } from '../../style';
 import { extractColorValue, extractTypographyValue } from '../../commons/modifiers';
 import TouchableOpacity from '../touchableOpacity';
 import Text from '../text';
+export let ButtonSize;
+
+(function (ButtonSize) {
+  ButtonSize["xSmall"] = "xSmall";
+  ButtonSize["small"] = "small";
+  ButtonSize["medium"] = "medium";
+  ButtonSize["large"] = "large";
+})(ButtonSize || (ButtonSize = {}));
+
+export let AnimationDirection;
+
+(function (AnimationDirection) {
+  AnimationDirection["center"] = "center";
+  AnimationDirection["left"] = "left";
+  AnimationDirection["right"] = "right";
+})(AnimationDirection || (AnimationDirection = {}));
+
 const PADDINGS = {
   XSMALL: 3,
   SMALL: 4.5,
@@ -30,7 +47,7 @@ const MIN_WIDTH = {
   MEDIUM: 77,
   LARGE: 90
 };
-const DEFAULT_SIZE = 'large';
+const DEFAULT_SIZE = ButtonSize.large;
 
 /**
  * @description: Basic button component
@@ -46,7 +63,7 @@ class Button extends PureComponent {
     color: _pt.string,
     iconOnRight: _pt.bool,
     backgroundColor: _pt.string,
-    size: _pt.oneOf(['xSmall', 'small', 'medium', 'large']),
+    size: _pt.oneOf(["xSmall", "small", "medium", "large"]),
     borderRadius: _pt.number,
     onPress: _pt.func,
     disabled: _pt.bool,
@@ -55,7 +72,6 @@ class Button extends PureComponent {
     outlineWidth: _pt.number,
     link: _pt.bool,
     linkColor: _pt.string,
-    labelProps: _pt.object,
     fullWidth: _pt.bool,
     round: _pt.bool,
     enableShadow: _pt.bool,
@@ -63,23 +79,14 @@ class Button extends PureComponent {
     avoidMinWidth: _pt.bool,
     getActiveBackgroundColor: _pt.func,
     animateLayout: _pt.bool,
-    animateTo: _pt.oneOf(['center', 'left', 'right'])
+    animateTo: _pt.oneOf(["center", "left", "right"])
   };
   static displayName = 'Button';
   static defaultProps = {
     iconOnRight: false
   };
-  static sizes = {
-    xSmall: 'xSmall',
-    small: 'small',
-    medium: 'medium',
-    large: 'large'
-  };
-  static animationDirection = {
-    center: 'center',
-    left: 'left',
-    right: 'right'
-  }; // This redundant constructor for some reason fix tests :/
+  static sizes = ButtonSize;
+  static animationDirection = AnimationDirection; // This redundant constructor for some reason fix tests :/
   // eslint-disable-next-line
 
   constructor(props) {
